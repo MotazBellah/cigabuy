@@ -4,7 +4,12 @@ import scrapy
 class ConsumerElectronicsSpider(scrapy.Spider):
     name = 'consumer_electronics'
     allowed_domains = ['www.cigabuy.com']
-    start_urls = ['https://www.cigabuy.com/consumer-electronics-c-56_75-pg-1.html']
+    # No need to start_urls, since we call start request function, to override the request header
+    # start_urls = ['https://www.cigabuy.com/consumer-electronics-c-56_75-pg-1.html']
+    header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',}
+
+    def start_requests(self):
+        yield scrapy.Request(url='https://www.cigabuy.com/consumer-electronics-c-56_75-pg-1.html', callback=self.parse, headers=self.header)
 
     def parse(self, response):
         # Get the div the contain all info about the product
@@ -25,4 +30,4 @@ class ConsumerElectronicsSpider(scrapy.Spider):
         next_page = response.xpath("(//a[@class='nextPage'])[1]/@href").get()
         # If found, call parse function on the url
         if next_page:
-            yield scrapy.Request(url=next_page, callback=self.parse)
+            yield scrapy.Request(url=next_page, callback=self.parse, headers=self.header)
